@@ -153,7 +153,10 @@ export async function callLLM(messages, tools, lang = 'en') {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
+        // gpt-oss is a reasoning model; keep reasoning minimal so it doesn't
+        // eat the token budget and to keep voice latency low.
+        reasoning_effort: 'low',
         messages: [{ role: 'system', content: buildSystemPrompt(lang) }, ...messages],
         tools: useTools && tools?.length ? tools : undefined,
         tool_choice: useTools && tools?.length ? 'auto' : undefined,
