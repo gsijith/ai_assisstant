@@ -16,10 +16,14 @@ const STATE_TONE = {
 };
 
 // ─── Sidebar ────────────────────────────────────────────────────────
-function Sidebar({ state, onToggle }) {
+function Sidebar({ state, onToggle, open, onNavigate }) {
   const isActive = state !== 'IDLE';
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 flex flex-col z-50 bg-surface-low/40 backdrop-blur-2xl border-r border-outline/30 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+    <aside
+      className={`fixed left-0 top-0 h-full w-64 flex flex-col z-50 bg-surface-low/95 lg:bg-surface-low/40 backdrop-blur-2xl border-r border-outline/30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] transition-transform duration-300 lg:translate-x-0 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
       <div className="p-5">
         <h1 className="font-display text-2xl font-bold text-primary tracking-tight glow-text">
           J.A.R.V.I.S
@@ -33,6 +37,7 @@ function Sidebar({ state, onToggle }) {
         {['DASHBOARD', 'CONVERSATION', 'MEMORY', 'SYSTEM_LOG', 'SETTINGS'].map((label, i) => (
           <button
             key={label}
+            onClick={onNavigate}
             className={`flex items-center gap-3 px-3 py-2.5 transition-all text-left ${
               i === 0
                 ? 'bg-primary/10 text-primary border-l-2 border-primary'
@@ -73,12 +78,19 @@ function Sidebar({ state, onToggle }) {
 }
 
 // ─── Top bar ────────────────────────────────────────────────────────
-function TopBar({ state, error, language }) {
+function TopBar({ state, error, language, onMenu }) {
   const tone = STATE_TONE[state];
   return (
-    <header className="fixed top-0 left-64 right-0 z-40 flex items-center justify-between px-10 py-3 bg-background/40 backdrop-blur-md border-b border-outline/30">
-      <div className="flex items-center gap-3">
-        <div className="font-mono text-[11px] tracking-[0.2em] text-primary border border-primary/40 px-3 py-1">
+    <header className="fixed top-0 left-0 lg:left-64 right-0 z-40 flex flex-wrap items-center gap-x-3 gap-y-2 px-3 sm:px-6 lg:px-10 py-3 bg-background/40 backdrop-blur-md border-b border-outline/30">
+      <button
+        onClick={onMenu}
+        aria-label="Toggle menu"
+        className="lg:hidden flex items-center justify-center w-9 h-9 border border-primary/40 text-primary shrink-0"
+      >
+        <span className="material-symbols-outlined text-xl">menu</span>
+      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="hidden sm:block font-mono text-[11px] tracking-[0.2em] text-primary border border-primary/40 px-3 py-1">
           JARVIS_v4.0 // VOICE_LINK
         </div>
         <div className="flex items-center gap-2 px-3 py-1 border border-primary/40">
@@ -94,9 +106,9 @@ function TopBar({ state, error, language }) {
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-5">
+      <div className="w-full lg:w-auto lg:ml-auto min-w-0">
         {error ? (
-          <div className="font-mono text-[10px] text-error tracking-widest">⚠ {error}</div>
+          <div className="font-mono text-[10px] text-error tracking-widest break-words line-clamp-2">⚠ {error}</div>
         ) : (
           <div className="font-mono text-[10px] text-on-surface-dim/60 tracking-[0.2em]">
             UPLINK <span className="text-primary glow-text">STABLE</span>
@@ -122,7 +134,7 @@ function Brackets() {
 function StatePanel({ state }) {
   const tone = STATE_TONE[state];
   return (
-    <div className="relative glass p-3 w-56">
+    <div className="relative glass p-3 w-full lg:w-56">
       <Brackets />
       <div className="flex justify-between items-center mb-2">
         <span className="font-mono text-[10px] text-primary tracking-[0.2em]">AI_STATE</span>
@@ -147,7 +159,7 @@ function StatePanel({ state }) {
 function AudioPanel({ level, isVoice, waveform }) {
   const bars = Array.from(waveform).map((v) => Math.abs(v - 128) / 128);
   return (
-    <div className="relative glass p-3 w-56">
+    <div className="relative glass p-3 w-full lg:w-56">
       <Brackets />
       <div className="flex justify-between items-center mb-2">
         <span className="font-mono text-[10px] text-primary tracking-[0.2em]">AUDIO_IN</span>
@@ -178,7 +190,7 @@ function AudioPanel({ level, isVoice, waveform }) {
 
 function StatsPanel({ stats }) {
   return (
-    <div className="relative glass p-3 w-56">
+    <div className="relative glass p-3 w-full lg:w-56">
       <Brackets />
       <div className="flex justify-between items-center mb-2">
         <span className="font-mono text-[10px] text-primary tracking-[0.2em]">SESSION</span>
@@ -200,7 +212,7 @@ function StatsPanel({ stats }) {
 
 function ModelPanel() {
   return (
-    <div className="relative glass p-3 w-56">
+    <div className="relative glass p-3 w-full lg:w-56">
       <Brackets />
       <div className="flex justify-between items-center mb-2">
         <span className="font-mono text-[10px] text-primary tracking-[0.2em]">MODEL_INFO</span>
@@ -331,7 +343,7 @@ function ArcReactor({ state, audioLevel }) {
 function LiveTranscript({ text, state }) {
   if (!text || state === 'SPEAKING' || state === 'IDLE') return null;
   return (
-    <div className="absolute bottom-72 left-1/2 -translate-x-1/2 w-[60%] max-w-2xl pointer-events-none animate-fade-in">
+    <div className="absolute bottom-56 lg:bottom-72 left-1/2 -translate-x-1/2 w-[90%] sm:w-[70%] lg:w-[60%] max-w-2xl pointer-events-none animate-fade-in">
       <div className="relative glass px-5 py-3 text-center">
         <Brackets />
         <div className="font-mono text-[10px] text-primary/60 tracking-widest mb-1">
@@ -353,7 +365,7 @@ function ConversationLog({ conversation }) {
   }, [conversation]);
 
   return (
-    <div className="fixed bottom-6 left-72 right-6 glass border-t-2 border-primary/30 h-44 flex flex-col overflow-hidden">
+    <div className="fixed bottom-2 lg:bottom-6 left-2 right-2 lg:left-72 lg:right-6 glass border-t-2 border-primary/30 h-36 lg:h-44 flex flex-col overflow-hidden z-30">
       <div className="flex items-center justify-between px-4 py-2 bg-primary/5 border-b border-outline/30">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-error animate-blink" />
@@ -391,6 +403,7 @@ export default function App() {
   const [weather, setWeather] = useState(null);
   const [media, setMedia] = useState(null);
   const [map, setMap] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleTool = useCallback(async (name, args) => {
     console.log('[App] Tool executed:', name, args);
@@ -488,10 +501,22 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-screen flex bg-background overflow-hidden">
-      <Sidebar state={a.state} onToggle={handleToggle} />
+    <div className="min-h-screen w-full flex bg-background overflow-x-hidden">
+      <Sidebar
+        state={a.state}
+        onToggle={handleToggle}
+        open={menuOpen}
+        onNavigate={() => setMenuOpen(false)}
+      />
 
-      <main className="flex-1 ml-64 relative scanline">
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+
+      <main className="flex-1 ml-0 lg:ml-64 relative scanline">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: 'radial-gradient(circle at center, rgba(165,231,255,0.05) 0%, transparent 70%)',
         }} />
@@ -499,15 +524,19 @@ export default function App() {
         <div className="absolute top-1/4 right-10 w-72 h-72 border border-primary/10 rounded-full pointer-events-none" />
         <div className="absolute bottom-1/3 left-10 w-[28rem] h-[28rem] border border-primary/5 rounded-full pointer-events-none" />
 
-        <TopBar state={a.state} error={a.error} language={a.language} />
+        <TopBar state={a.state} error={a.error} language={a.language} onMenu={() => setMenuOpen((v) => !v)} />
 
-        <div className="pt-24 px-10 pb-56 h-full flex items-center justify-center relative">
-          <div className="relative">
-            <ArcReactor state={a.state} audioLevel={a.audioLevel} />
-            <div className="absolute -top-2 -left-44"><StatePanel state={a.state} /></div>
-            <div className="absolute -top-2 -right-44"><AudioPanel level={a.audioLevel} isVoice={a.isVoice} waveform={a.waveform} /></div>
-            <div className="absolute -bottom-2 -left-44"><ModelPanel /></div>
-            <div className="absolute -bottom-2 -right-44"><StatsPanel stats={a.stats} /></div>
+        <div className="pt-28 lg:pt-24 px-4 sm:px-8 lg:px-10 pb-44 lg:pb-56 lg:h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-8 lg:gap-0 relative">
+          <div className="relative w-full lg:w-auto flex flex-col items-center gap-6 overflow-hidden lg:overflow-visible lg:block lg:gap-0">
+            <div className="scale-[0.62] sm:scale-90 lg:scale-100 origin-center -my-16 sm:-my-6 lg:my-0">
+              <ArcReactor state={a.state} audioLevel={a.audioLevel} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-sm lg:max-w-none lg:contents">
+              <div className="lg:absolute lg:-top-2 lg:-left-44"><StatePanel state={a.state} /></div>
+              <div className="lg:absolute lg:-top-2 lg:-right-44"><AudioPanel level={a.audioLevel} isVoice={a.isVoice} waveform={a.waveform} /></div>
+              <div className="lg:absolute lg:-bottom-2 lg:-left-44"><ModelPanel /></div>
+              <div className="lg:absolute lg:-bottom-2 lg:-right-44"><StatsPanel stats={a.stats} /></div>
+            </div>
           </div>
           <LiveTranscript text={a.transcript} state={a.state} />
         </div>

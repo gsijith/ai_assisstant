@@ -49,7 +49,7 @@ body {
   background: #0e1417;
   color: #dde3e7;
   font-family: var(--font-mono);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
