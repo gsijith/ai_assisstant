@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0e1417;
+  --color-surface: #161d1f;
+  --color-surface-low: #1a2123;
+  --color-surface-high: #242b2e;
+  --color-primary: #a5e7ff;
+  --color-primary-strong: #00d2ff;
+  --color-on-surface: #dde3e7;
+  --color-on-surface-dim: #bbc9cf;
+  --color-tertiary: #ffd5b7;
+  --color-error: #ffb4ab;
+  --color-outline: #3c494e;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --animate-spin-slow: spin 30s linear infinite;
+  --animate-spin-medium: spin 18s linear infinite;
+  --animate-spin-reverse: spin-reverse 22s linear infinite;
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-blink: blink 1.2s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.4s ease-out;
+}
+
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body {
+  margin: 0;
+  background: #0e1417;
+  color: #dde3e7;
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3c494e; border-radius: 2px; }
+
+.glass {
+  background: rgba(18, 22, 24, 0.5);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.arc-glow {
+  box-shadow: 0 0 60px -10px rgba(165, 231, 255, 0.5),
+              inset 0 0 40px rgba(165, 231, 255, 0.2);
+}
+
+.scanline {
+  background-image: linear-gradient(transparent 50%, rgba(165, 231, 255, 0.025) 50%);
+  background-size: 100% 4px;
+}
+
+.glow-text {
+  text-shadow: 0 0 12px currentColor;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+}
