@@ -3,6 +3,10 @@ import { callLLM, TOOLS } from './llm';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { Capacitor } from '@capacitor/core';
 
+// Base URL for the serverless API proxy. Empty = same-origin (the web app).
+// Set VITE_API_BASE to the deployed URL for the Capacitor/Android build.
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
 // ─── STT (Web Speech API) ───────────────────────────────────────────
 export function useSTT({ lang = 'en-US' } = {}) {
   const [transcript, setTranscript] = useState('');
@@ -74,20 +78,17 @@ function chunkText(text, maxLen = 180) {
   return chunks;
 }
 
-// ElevenLabs — best Malayalam quality, requires free key in VITE_ELEVENLABS_API_KEY
+// ElevenLabs — best Malayalam quality, requires ELEVENLABS_API_KEY set server-side (see /api/elevenlabs)
 async function elevenLabsTTS(text) {
-  const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-  if (!apiKey) return null;
-  // "Rachel" voice (works well for multilingual). You can swap voice IDs from elevenlabs.io/voice-library
+  // "Rachel" voice (works well for multilingual). Swap voice IDs from elevenlabs.io/voice-library
   const voiceId = '21m00Tcm4TlvDq8ikWAM';
-  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+  const res = await fetch(`${API_BASE}/api/elevenlabs`, {
     method: 'POST',
     headers: {
-      'xi-api-key': apiKey,
       'Content-Type': 'application/json',
-      'Accept': 'audio/mpeg',
     },
     body: JSON.stringify({
+      voiceId,
       text,
       model_id: 'eleven_multilingual_v2',
       voice_settings: { stability: 0.5, similarity_boost: 0.75 },
@@ -109,16 +110,12 @@ function googleTTSUrl(text, lang) {
 // ─── Sarvam TTS (free Indian-language TTS, Malayalam native) ───────
 
 async function sarvamTTS(text, lang = 'ml') {
-  const apiKey = import.meta.env.VITE_SARVAM_API_KEY;
-  if (!apiKey) return null;
-
   const langCode = lang === 'ml' ? 'ml-IN' : 'en-IN';
 
   // v3 supports up to ~1500 chars per request and handles code-mixed text well
-  const res = await fetch('https://api.sarvam.ai/text-to-speech', {
+  const res = await fetch(`${API_BASE}/api/sarvam`, {
     method: 'POST',
     headers: {
-      'api-subscription-key': apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -213,25 +210,23 @@ export function useTTS() {
       cancelledRef.current = false;
 
       // For Malayalam, only use native if a real ml-* voice exists; otherwise use Sarvam.
+      // sarvamTTS returns null if the server has no SARVAM_API_KEY configured.
       if (lang === 'ml' && !pickMlVoice()) {
-        if (import.meta.env.VITE_SARVAM_API_KEY) {
-          console.log('[TTS] Using Sarvam AI for Malayalam');
-          setIsSpeaking(true);
-          try {
-            const url = await sarvamTTS(text, 'ml');
-            if (url) {
-              await playUrl(url);
-              URL.revokeObjectURL(url);
-              setIsSpeaking(false);
-              return;
-            }
-          } catch (e) {
-            console.warn('[TTS] Sarvam failed:', e);
+        console.log('[TTS] Using Sarvam AI for Malayalam');
+        setIsSpeaking(true);
+        try {
+          const url = await sarvamTTS(text, 'ml');
+          if (url) {
+            await playUrl(url);
+            URL.revokeObjectURL(url);
+            setIsSpeaking(false);
+            return;
           }
-          setIsSpeaking(false);
-          return;
+        } catch (e) {
+          console.warn('[TTS] Sarvam failed:', e);
         }
-        console.warn('[TTS] No Malayalam voice and no SARVAM key — silent.');
+        setIsSpeaking(false);
+        console.warn('[TTS] Malayalam TTS unavailable — silent.');
         return;
       }
 

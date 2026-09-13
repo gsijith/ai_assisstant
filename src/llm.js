@@ -140,17 +140,17 @@ export const TOOLS = [
 ];
 
 
-export async function callLLM(messages, tools, lang = 'en') {
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-  if (!apiKey) throw new Error('Missing VITE_GROQ_API_KEY in .env');
+// Base URL for the serverless API proxy. Empty = same-origin (the web app).
+// Set VITE_API_BASE to the deployed URL for the Capacitor/Android build.
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
+export async function callLLM(messages, tools, lang = 'en') {
   const doCall = async (useTools) => {
     const t0 = performance.now();
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch(`${API_BASE}/api/groq`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
