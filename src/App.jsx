@@ -209,7 +209,7 @@ function ModelPanel() {
       <div className="text-[11px] font-mono space-y-1">
         <div className="flex justify-between">
           <span className="text-on-surface-dim/60">LLM</span>
-          <span className="text-primary">gpt-4o-mini</span>
+          <span className="text-primary">gpt-oss-120b</span>
         </div>
         <div className="flex justify-between">
           <span className="text-on-surface-dim/60">STT</span>
